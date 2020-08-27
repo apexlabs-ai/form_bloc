@@ -123,7 +123,10 @@ abstract class FormBloc<SuccessResponse, FailureResponse> extends Bloc<
       (key, singleFieldBlocs) {
         _areAllFieldsValidSubscription[key] =
             Rx.combineLatest<FieldBlocState, List<FieldBlocState>>(
-          singleFieldBlocs,
+          singleFieldBlocs.map((fieldBloc) => Rx.merge([
+                Stream.value(fieldBloc.state),
+                fieldBloc,
+              ])),
           (fieldStates) {
             // if any value change, then can submit again
             _canSubmit = true;
@@ -570,7 +573,10 @@ abstract class FormBloc<SuccessResponse, FailureResponse> extends Bloc<
         currentStep: stateSnapshot.currentStep,
       );
       yield newState;
-      await firstWhere((state) => state == newState);
+      await Rx.merge([
+        Stream.value(state),
+        this,
+      ]).firstWhere((state) => state == newState);
 
       await _callInBlocContext(onCancelingSubmission);
     }
@@ -678,7 +684,10 @@ abstract class FormBloc<SuccessResponse, FailureResponse> extends Bloc<
 
       yield newState;
 
-      await firstWhere((state) => state == newState);
+      await Rx.merge([
+        Stream.value(state),
+        this,
+      ]).firstWhere((state) => state == newState);
     }
   }
 
@@ -731,7 +740,10 @@ abstract class FormBloc<SuccessResponse, FailureResponse> extends Bloc<
 
         yield newState;
 
-        await firstWhere((state) => state == newState);
+        await Rx.merge([
+          Stream.value(state),
+          this,
+        ]).firstWhere((state) => state == newState);
       }
     }
   }
@@ -793,7 +805,10 @@ abstract class FormBloc<SuccessResponse, FailureResponse> extends Bloc<
 
       yield newState;
 
-      await firstWhere((state) => state == newState);
+      await Rx.merge([
+        Stream.value(state),
+        this,
+      ]).firstWhere((state) => state == newState);
     }
   }
 
@@ -868,7 +883,10 @@ abstract class FormBloc<SuccessResponse, FailureResponse> extends Bloc<
 
       yield newState;
 
-      await firstWhere((state) => state == newState);
+      await Rx.merge([
+        Stream.value(state),
+        this,
+      ]).firstWhere((state) => state == newState);
     }
   }
 }
